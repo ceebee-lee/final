@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
-import 'pages/home_page.dart';
+import 'package:provider/provider.dart';
+import 'providers/habit_provider.dart';
+import 'screens/home_page.dart';
 
 void main() {
-  runApp(HabitTrackerApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => HabitProvider(),
+      child: const HabitTrackerApp(),
+    ),
+  );
 }
 
 class HabitTrackerApp extends StatelessWidget {
@@ -21,7 +28,7 @@ class HabitTrackerApp extends StatelessWidget {
           },
         ),
       ),
-      home: HomePage(),
+      home: const HomePage(),
     );
   }
 }
