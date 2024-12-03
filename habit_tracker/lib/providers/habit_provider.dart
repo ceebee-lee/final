@@ -1,17 +1,25 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+class Habit {
+  final String name;
+  final int goalCount;
+  int currentCount;
+
+  Habit({required this.name, required this.goalCount, this.currentCount = 0});
+}
 
 class HabitProvider extends ChangeNotifier {
-  final List<String> _habits = [];
+  final List<Habit> _habits = [];
 
-  List<String> get habits => _habits;
+  List<Habit> get habits => _habits;
 
-  void addHabit(String habit) {
-    _habits.add(habit);
+  void addHabit(String name, int goalCount) {
+    _habits.add(Habit(name: name, goalCount: goalCount));
     notifyListeners();
   }
 
-  void removeHabit(String habit) {
-    _habits.remove(habit);
+  void incrementHabit(int index) {
+    _habits[index].currentCount++;
     notifyListeners();
   }
 }

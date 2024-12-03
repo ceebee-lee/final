@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/habit_provider.dart';
-import 'screens/home_page.dart';
+import 'screens/home_screen.dart';
+import 'screens/second_screen.dart';
+import 'screens/third_screen.dart';
 
 void main() {
   runApp(
@@ -19,35 +21,54 @@ class HabitTrackerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Habit Tracker',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        pageTransitionsTheme: PageTransitionsTheme(
-          builders: {
-            TargetPlatform.android: SlidePageTransitionsBuilder(),
-            TargetPlatform.iOS: SlidePageTransitionsBuilder(),
-          },
-        ),
-      ),
-      home: const HomePage(),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const MainPage(),
     );
   }
 }
 
-// Custom slide transition builder for MaterialPageRoute
-class SlidePageTransitionsBuilder extends PageTransitionsBuilder {
+class MainPage extends StatefulWidget {
+  const MainPage({super.key});
+
   @override
-  Widget buildTransitions<T>(
-      PageRoute<T> route,
-      BuildContext context,
-      Animation<double> animation,
-      Animation<double> secondaryAnimation,
-      Widget child) {
-    return SlideTransition(
-      position: Tween<Offset>(
-        begin: const Offset(1.0, 0.0),
-        end: Offset.zero,
-      ).animate(animation),
-      child: child,
+  _MainPageState createState() => _MainPageState();
+}
+
+class _MainPageState extends State<MainPage> {
+  int _currentIndex = 0;
+
+  final List<Widget> _pages = [
+    const HomeScreen(),
+    const SecondScreen(),
+    const ThirdScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _pages[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Second',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Third',
+          ),
+        ],
+      ),
     );
   }
 }
