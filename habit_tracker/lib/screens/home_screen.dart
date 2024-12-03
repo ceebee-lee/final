@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/theme_provider.dart';
 import '../providers/habit_provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -9,6 +8,9 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final habitProvider = Provider.of<HabitProvider>(context);
+
+    // 다크모드 감지
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       appBar: AppBar(
@@ -28,12 +30,10 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.brightness_6),
-              title: const Text('Toggle Dark Mode'),
+              leading: const Icon(Icons.settings),
+              title: const Text('Settings'),
               onTap: () {
-                Provider.of<ThemeProvider>(context, listen: false)
-                    .toggleTheme();
-                Navigator.pop(context); // 메뉴 닫기
+                // 설정 화면으로 이동
               },
             ),
           ],
@@ -41,6 +41,20 @@ class HomeScreen extends StatelessWidget {
       ),
       body: Column(
         children: [
+          const SizedBox(height: 20),
+          Center(
+            child: Text(
+              '“The journey of a thousand miles begins with a single step.”\nAdd your first habit today!',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 18,
+                fontStyle: FontStyle.italic,
+                fontWeight: FontWeight.bold,
+                color: isDarkMode ? Colors.lightBlueAccent : Colors.blueAccent,
+              ),
+            ),
+          ),
+          const SizedBox(height: 20),
           Expanded(
             child: ListView.builder(
               itemCount: habitProvider.habits.length,
