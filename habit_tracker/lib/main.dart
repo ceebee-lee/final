@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'providers/habit_provider.dart';
+import 'providers/quote_provider.dart';
 import 'screens/home_screen.dart';
 import 'screens/second_screen.dart';
 import 'screens/third_screen.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
       title: 'Habit Tracker',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
-      themeMode: themeProvider.currentTheme, // 다크모드 연동
+      themeMode: themeProvider.currentTheme, // Dark mode integration
       home: const MainPage(),
     );
   }
@@ -48,7 +49,7 @@ class _MainPageState extends State<MainPage> {
   final List<Widget> _pages = [
     const HomeScreen(),
     const SecondScreen(),
-    const ThirdScreen(),
+    ThirdScreen(), // Includes the quote widget
   ];
 
   @override
@@ -77,6 +78,46 @@ class _MainPageState extends State<MainPage> {
           ),
         ],
       ),
+    );
+  }
+}
+
+// Widget to display a motivational quote
+class MotivationalQuoteWidget extends StatefulWidget {
+  const MotivationalQuoteWidget({super.key});
+
+  @override
+  MotivationalQuoteWidgetState createState() => MotivationalQuoteWidgetState();
+}
+
+class MotivationalQuoteWidgetState extends State<MotivationalQuoteWidget> {
+  String? _quote;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchQuote();
+  }
+
+  Future<void> _fetchQuote() async {
+    final quoteProvider = QuoteProvider();
+    final quote = await quoteProvider.fetchRandomQuote();
+    setState(() {
+      _quote = quote;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: _quote == null
+          ? const CircularProgressIndicator()
+          : Text(
+              _quote!,
+              style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+              textAlign: TextAlign.center,
+            ),
     );
   }
 }

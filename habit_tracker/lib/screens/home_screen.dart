@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/habit_provider.dart';
+import '../providers/quote_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -32,16 +33,15 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.brightness_6),
               title: const Text('Toggle Dark Mode'),
               onTap: () {
-                themeProvider.toggleTheme(); // 다크모드 전환
-                Navigator.pop(context); // 메뉴 닫기
+                themeProvider.toggleTheme(); // Dark mode toggle
+                Navigator.pop(context); // Close menu
               },
             ),
             ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
-                // 추후 설정 화면으로 연결
-                Navigator.pop(context); // 메뉴 닫기
+                Navigator.pop(context); // Close menu
               },
             ),
           ],
@@ -50,50 +50,45 @@ class HomeScreen extends StatelessWidget {
       body: Column(
         children: [
           const SizedBox(height: 20),
-          Center(
-            child: Text(
-              '“The journey of a thousand miles begins with a single step.”\nAdd your first habit today!',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 18,
-                fontStyle: FontStyle.italic,
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? Colors.lightBlueAccent
-                    : Colors.blueAccent,
-              ),
-            ),
-          ),
+          const MotivationalQuoteWidget(), // Display API-fetched quote
           const SizedBox(height: 20),
           Expanded(
-            child: ListView.builder(
-              itemCount: habitProvider.habits.length,
-              itemBuilder: (context, index) {
-                final habit = habitProvider.habits[index];
-                return ListTile(
-                  title: Text(habit.name),
-                  subtitle: Text(
-                      'Progress: ${habit.currentCount}/${habit.goalCount}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          habitProvider.incrementHabit(index);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          habitProvider.removeHabit(index);
-                        },
-                      ),
-                    ],
+            child: habitProvider.habits.isEmpty
+                ? Center(
+                    child: Text(
+                      'No habits yet. Add your first habit!',
+                      style: Theme.of(context).textTheme.bodyLarge,
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: habitProvider.habits.length,
+                    itemBuilder: (context, index) {
+                      final habit = habitProvider.habits[index];
+                      return ListTile(
+                        title: Text(habit.name),
+                        subtitle: Text(
+                            'Progress: ${habit.currentCount}/${habit.goalCount}'),
+                        trailing: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: () {
+                                habitProvider.incrementHabit(index);
+                              },
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                _confirmDeleteHabit(
+                                    context, habitProvider, index);
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
-            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -140,11 +135,20 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 if (nameController.text.isNotEmpty &&
                     goalController.text.isNotEmpty) {
-                  provider.addHabit(
-                    nameController.text,
-                    int.parse(goalController.text),
-                  );
-                  Navigator.of(context).pop();
+                  final goalCount = int.tryParse(goalController.text);
+                  if (goalCount != null) {
+                    provider.addHabit(
+                      nameController.text,
+                      goalCount,
+                    );
+                    Navigator.of(context).pop();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Please enter a valid number.'),
+                      ),
+                    );
+                  }
                 }
               },
               child: const Text('Add'),
@@ -154,5 +158,71 @@ class HomeScreen extends StatelessWidget {
       },
     );
   }
+
+  void _confirmDeleteHabit(
+      BuildContext context, HabitProvider provider, int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Habit'),
+          content: const Text('Are you sure you want to delete this habit?'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                provider.removeHabit(index);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
- 
+
+// MotivationalQuoteWidget: Display a quote fetched from API
+class MotivationalQuoteWidget extends StatefulWidget {
+  const MotivationalQuoteWidget({super.key});
+
+  @override
+  State<MotivationalQuoteWidget> createState() =>
+      _MotivationalQuoteWidgetState();
+}
+
+class _MotivationalQuoteWidgetState extends State<MotivationalQuoteWidget> {
+  String? _quote;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchQuote();
+  }
+
+  Future<void> _fetchQuote() async {
+    final quoteProvider = QuoteProvider();
+    final quote = await quoteProvider.fetchRandomQuote();
+    setState(() {
+      _quote = quote;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      child: _quote == null
+          ? const CircularProgressIndicator()
+          : Text(
+              _quote!,
+              style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
+              textAlign: TextAlign.center,
+            ),
+    );
+  }
+}
