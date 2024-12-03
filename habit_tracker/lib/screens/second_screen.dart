@@ -11,6 +11,14 @@ class SecondScreen extends StatelessWidget {
     final habitProvider = Provider.of<HabitProvider>(context);
     final habits = habitProvider.habits;
 
+    final List<Color> barColors = [
+      Colors.blueAccent,
+      Colors.redAccent,
+      Colors.greenAccent,
+      Colors.purpleAccent,
+      Colors.orangeAccent,
+    ];
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
@@ -42,7 +50,7 @@ class SecondScreen extends StatelessWidget {
                                     .fold(0, (a, b) => a > b ? a : b)
                                     .toDouble() +
                                 1
-                            : 1, // 기본값 설정
+                            : 1,
                         barGroups: habits
                             .asMap()
                             .entries
@@ -54,7 +62,8 @@ class SecondScreen extends StatelessWidget {
                                     toY: entry.value.completedCount.toDouble(),
                                     width: 20,
                                     borderRadius: BorderRadius.circular(4),
-                                    color: Colors.blueAccent,
+                                    color: barColors[entry.key %
+                                        barColors.length], // 색상 순환 적용
                                   ),
                                 ],
                               ),
