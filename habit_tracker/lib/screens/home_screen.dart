@@ -36,7 +36,7 @@ class HomeScreen extends StatelessWidget {
                       IconButton(
                         icon: const Icon(Icons.delete, color: Colors.red),
                         onPressed: () {
-                          _confirmDelete(context, habitProvider, index);
+                          habitProvider.removeHabit(index);
                         },
                       ),
                     ],
@@ -98,33 +98,6 @@ class HomeScreen extends StatelessWidget {
                 }
               },
               child: const Text('Add'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _confirmDelete(BuildContext context, HabitProvider provider, int index) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Delete Habit'),
-          content: const Text('Are you sure you want to delete this habit?'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                provider.removeHabit(index);
-                Navigator.of(context).pop();
-              },
-              child: const Text('Delete'),
             ),
           ],
         );

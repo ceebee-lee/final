@@ -10,7 +10,7 @@ class SecondScreen extends StatefulWidget {
 }
 
 class _SecondScreenState extends State<SecondScreen> {
-  bool _isWeekly = true; // 현재 표시 중인 통계 타입
+  bool _isWeekly = true;
 
   @override
   Widget build(BuildContext context) {

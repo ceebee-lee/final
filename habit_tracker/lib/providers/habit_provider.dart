@@ -4,7 +4,7 @@ class Habit {
   final String name;
   final int goalCount;
   int currentCount;
-  int completedCount; // 완료된 횟수
+  int completedCount;
 
   Habit({
     required this.name,
@@ -17,8 +17,8 @@ class Habit {
     if (currentCount < goalCount) {
       currentCount++;
       if (currentCount == goalCount) {
-        completedCount++; // 목표 달성 시 완료 횟수 증가
-        currentCount = 0; // 초기화
+        completedCount++;
+        currentCount = 0;
       }
     }
   }
@@ -26,8 +26,11 @@ class Habit {
 
 class HabitProvider extends ChangeNotifier {
   final List<Habit> _habits = [];
+  final Map<DateTime, List<String>> _dailyHabits = {};
 
   List<Habit> get habits => _habits;
+
+  Map<DateTime, List<String>> get dailyHabits => _dailyHabits;
 
   void addHabit(String name, int goalCount) {
     _habits.add(Habit(name: name, goalCount: goalCount));
@@ -44,17 +47,22 @@ class HabitProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // 주간 통계
-  Map<String, int> getWeeklyStats() {
-    return {
-      for (var habit in _habits) habit.name: habit.completedCount
-    };
+  void completeHabitOnDate(DateTime date, String habitName) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    _dailyHabits.putIfAbsent(normalizedDate, () => []).add(habitName);
+    notifyListeners();
   }
 
-  // 월간 통계 (단순히 완료 횟수로 표시)
+  List<String> getHabitsForDate(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    return _dailyHabits[normalizedDate] ?? [];
+  }
+
+  Map<String, int> getWeeklyStats() {
+    return {for (var habit in _habits) habit.name: habit.completedCount};
+  }
+
   Map<String, int> getMonthlyStats() {
-    return {
-      for (var habit in _habits) habit.name: habit.completedCount * 4 // 예시로 주간 통계의 4배로 계산
-    };
+    return {for (var habit in _habits) habit.name: habit.completedCount * 4};
   }
 }

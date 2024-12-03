@@ -60,12 +60,12 @@ class _MainPageState extends State<MainPage> {
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Second',
+            icon: Icon(Icons.bar_chart),
+            label: 'Statistics',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Third',
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendar',
           ),
         ],
       ),
