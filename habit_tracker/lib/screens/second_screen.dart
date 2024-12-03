@@ -1,74 +1,108 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
 import '../providers/habit_provider.dart';
 
-class SecondScreen extends StatefulWidget {
+class SecondScreen extends StatelessWidget {
   const SecondScreen({super.key});
-
-  @override
-  _SecondScreenState createState() => _SecondScreenState();
-}
-
-class _SecondScreenState extends State<SecondScreen> {
-  bool _isWeekly = true;
 
   @override
   Widget build(BuildContext context) {
     final habitProvider = Provider.of<HabitProvider>(context);
-
-    final stats = _isWeekly
-        ? habitProvider.getWeeklyStats()
-        : habitProvider.getMonthlyStats();
+    final habits = habitProvider.habits;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Statistics'),
       ),
-      body: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isWeekly = true;
-                  });
-                },
-                child: const Text('Weekly'),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Habit Completion Stats',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-              const SizedBox(width: 10),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() {
-                    _isWeekly = false;
-                  });
-                },
-                child: const Text('Monthly'),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: stats.isNotEmpty
-                ? ListView.builder(
-                    itemCount: stats.length,
-                    itemBuilder: (context, index) {
-                      final habitName = stats.keys.elementAt(index);
-                      final habitCount = stats.values.elementAt(index);
-
-                      return ListTile(
-                        title: Text(habitName),
-                        subtitle: Text(
-                            '${_isWeekly ? 'Weekly' : 'Monthly'} Completions: $habitCount'),
-                      );
-                    },
+            ),
+            const SizedBox(height: 20),
+            habits.isEmpty
+                ? const Center(
+                    child: Text('No habits available to display stats.'),
                   )
-                : const Center(
-                    child: Text('No statistics available yet.'),
+                : Expanded(
+                    child: BarChart(
+                      BarChartData(
+                        alignment: BarChartAlignment.spaceAround,
+                        maxY: habits.isNotEmpty
+                            ? habits
+                                    .map((h) => h.completedCount)
+                                    .fold(0, (a, b) => a > b ? a : b)
+                                    .toDouble() +
+                                1
+                            : 1, // 기본값 설정
+                        barGroups: habits
+                            .asMap()
+                            .entries
+                            .map(
+                              (entry) => BarChartGroupData(
+                                x: entry.key,
+                                barRods: [
+                                  BarChartRodData(
+                                    toY: entry.value.completedCount.toDouble(),
+                                    width: 20,
+                                    borderRadius: BorderRadius.circular(4),
+                                    color: Colors.blueAccent,
+                                  ),
+                                ],
+                              ),
+                            )
+                            .toList(),
+                        titlesData: FlTitlesData(
+                          show: true,
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                final habitIndex = value.toInt();
+                                if (habitIndex >= 0 &&
+                                    habitIndex < habits.length) {
+                                  return SideTitleWidget(
+                                    axisSide: meta.axisSide,
+                                    child: Text(
+                                      habits[habitIndex].name,
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                  );
+                                }
+                                return const SizedBox.shrink();
+                              },
+                            ),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              getTitlesWidget: (value, meta) {
+                                return SideTitleWidget(
+                                  axisSide: meta.axisSide,
+                                  child: Text(
+                                    value.toInt().toString(),
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        gridData: FlGridData(show: false),
+                        borderData: FlBorderData(show: false),
+                      ),
+                    ),
                   ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
