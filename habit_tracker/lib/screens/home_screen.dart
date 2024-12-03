@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/habit_provider.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -8,9 +9,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final habitProvider = Provider.of<HabitProvider>(context);
-
-    // 다크모드 감지
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final themeProvider = Provider.of<ThemeProvider>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
@@ -30,10 +29,19 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             ListTile(
+              leading: const Icon(Icons.brightness_6),
+              title: const Text('Toggle Dark Mode'),
+              onTap: () {
+                themeProvider.toggleTheme(); // 다크모드 전환
+                Navigator.pop(context); // 메뉴 닫기
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
               onTap: () {
-                // 설정 화면으로 이동
+                // 추후 설정 화면으로 연결
+                Navigator.pop(context); // 메뉴 닫기
               },
             ),
           ],
@@ -50,7 +58,9 @@ class HomeScreen extends StatelessWidget {
                 fontSize: 18,
                 fontStyle: FontStyle.italic,
                 fontWeight: FontWeight.bold,
-                color: isDarkMode ? Colors.lightBlueAccent : Colors.blueAccent,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.lightBlueAccent
+                    : Colors.blueAccent,
               ),
             ),
           ),
@@ -145,3 +155,4 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
+ 
