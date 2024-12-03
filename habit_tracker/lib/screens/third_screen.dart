@@ -10,10 +10,35 @@ class ThirdScreen extends StatefulWidget {
   _ThirdScreenState createState() => _ThirdScreenState();
 }
 
-class _ThirdScreenState extends State<ThirdScreen> {
+class _ThirdScreenState extends State<ThirdScreen>
+    with SingleTickerProviderStateMixin {
   DateTime _focusedDay = DateTime(2024, 12, 1); // 기본 2024년 12월
   DateTime? _selectedDay;
   Map<DateTime, List<String>> _events = {};
+  late AnimationController _animationController;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    _opacityAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(
+        parent: _animationController,
+        curve: Curves.easeInOut,
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +62,8 @@ class _ThirdScreenState extends State<ThirdScreen> {
               setState(() {
                 _selectedDay = selectedDay;
                 _focusedDay = focusedDay;
+                _animationController.reset();
+                _animationController.forward(); // 애니메이션 재생
               });
             },
             onPageChanged: (focusedDay) {
@@ -59,9 +86,17 @@ class _ThirdScreenState extends State<ThirdScreen> {
           ),
           const SizedBox(height: 20),
           Expanded(
-            child: _selectedDay == null
-                ? const Center(child: Text('Select a date to see habits.'))
-                : _buildHabitList(context, habitProvider),
+            child: AnimatedBuilder(
+              animation: _opacityAnimation,
+              builder: (context, child) {
+                return Opacity(
+                  opacity: _opacityAnimation.value,
+                  child: _selectedDay == null
+                      ? const Center(child: Text('Select a date to see habits.'))
+                      : _buildHabitList(context, habitProvider),
+                );
+              },
+            ),
           ),
         ],
       ),

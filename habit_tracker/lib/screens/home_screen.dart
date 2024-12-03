@@ -2,8 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/habit_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
 
   @override
   Widget build(BuildContext context) {
@@ -16,38 +23,18 @@ class HomeScreen extends StatelessWidget {
       body: Column(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: habitProvider.habits.length,
-              itemBuilder: (context, index) {
+            child: AnimatedList(
+              key: _listKey,
+              initialItemCount: habitProvider.habits.length,
+              itemBuilder: (context, index, animation) {
                 final habit = habitProvider.habits[index];
-                return ListTile(
-                  title: Text(habit.name),
-                  subtitle: Text(
-                      'Progress: ${habit.currentCount}/${habit.goalCount}'),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.add),
-                        onPressed: () {
-                          habitProvider.incrementHabit(index);
-                        },
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.delete, color: Colors.red),
-                        onPressed: () {
-                          habitProvider.removeHabit(index);
-                        },
-                      ),
-                    ],
-                  ),
-                );
+                return _buildHabitTile(context, habitProvider, index, animation);
               },
             ),
           ),
           ElevatedButton(
             onPressed: () {
-              _addNewHabit(context);
+              _addNewHabit(context, habitProvider);
             },
             child: const Text('Add Habit'),
           ),
@@ -56,7 +43,38 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _addNewHabit(BuildContext context) {
+  Widget _buildHabitTile(BuildContext context, HabitProvider provider,
+      int index, Animation<double> animation) {
+    final habit = provider.habits[index];
+
+    return SizeTransition(
+      sizeFactor: animation,
+      child: ListTile(
+        title: Text(habit.name),
+        subtitle: Text(
+            'Progress: ${habit.currentCount}/${habit.goalCount}'),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            IconButton(
+              icon: const Icon(Icons.add),
+              onPressed: () {
+                provider.incrementHabit(index);
+              },
+            ),
+            IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () {
+                _removeHabit(context, provider, index);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _addNewHabit(BuildContext context, HabitProvider provider) {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController goalController = TextEditingController();
 
@@ -90,10 +108,11 @@ class HomeScreen extends StatelessWidget {
               onPressed: () {
                 if (nameController.text.isNotEmpty &&
                     goalController.text.isNotEmpty) {
-                  Provider.of<HabitProvider>(context, listen: false).addHabit(
+                  provider.addHabit(
                     nameController.text,
                     int.parse(goalController.text),
                   );
+                  _listKey.currentState?.insertItem(provider.habits.length - 1);
                   Navigator.of(context).pop();
                 }
               },
@@ -102,6 +121,28 @@ class HomeScreen extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  void _removeHabit(BuildContext context, HabitProvider provider, int index) {
+    final removedHabit = provider.habits[index];
+
+    _listKey.currentState?.removeItem(
+      index,
+      (context, animation) => _buildHabitTile(
+        context,
+        provider,
+        index,
+        animation,
+      ),
+    );
+
+    provider.removeHabit(index);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Deleted habit: ${removedHabit.name}'),
+      ),
     );
   }
 }
