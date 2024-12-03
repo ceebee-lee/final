@@ -24,9 +24,23 @@ class HomeScreen extends StatelessWidget {
                   title: Text(habit.name),
                   subtitle: Text(
                       'Progress: ${habit.currentCount}/${habit.goalCount}'),
-                  onTap: () {
-                    habitProvider.incrementHabit(index);
-                  },
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        icon: const Icon(Icons.add),
+                        onPressed: () {
+                          habitProvider.incrementHabit(index);
+                        },
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          _confirmDelete(context, habitProvider, index);
+                        },
+                      ),
+                    ],
+                  ),
                 );
               },
             ),
@@ -84,6 +98,33 @@ class HomeScreen extends StatelessWidget {
                 }
               },
               child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _confirmDelete(BuildContext context, HabitProvider provider, int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Habit'),
+          content: const Text('Are you sure you want to delete this habit?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                provider.removeHabit(index);
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
             ),
           ],
         );

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 
 class Habit {
   final String name;
@@ -20,6 +20,11 @@ class HabitProvider extends ChangeNotifier {
 
   void incrementHabit(int index) {
     _habits[index].currentCount++;
+    notifyListeners();
+  }
+
+  void removeHabit(int index) {
+    _habits.removeAt(index);
     notifyListeners();
   }
 }
