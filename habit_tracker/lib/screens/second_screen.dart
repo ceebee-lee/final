@@ -1,32 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/habit_provider.dart';
 
-class SecondScreen extends StatelessWidget {
+class SecondScreen extends StatefulWidget {
   const SecondScreen({super.key});
 
   @override
+  _SecondScreenState createState() => _SecondScreenState();
+}
+
+class _SecondScreenState extends State<SecondScreen> {
+  bool _isWeekly = true; // 현재 표시 중인 통계 타입
+
+  @override
   Widget build(BuildContext context) {
+    final habitProvider = Provider.of<HabitProvider>(context);
+
+    final stats = _isWeekly
+        ? habitProvider.getWeeklyStats()
+        : habitProvider.getMonthlyStats();
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Second Screen'),
+        title: const Text('Statistics'),
       ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'This is the Second Screen!',
-              style: TextStyle(fontSize: 20),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Navigate back to the previous screen
-                Navigator.of(context).pop();
-              },
-              child: const Text('Go Back'),
-            ),
-          ],
-        ),
+      body: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isWeekly = true;
+                  });
+                },
+                child: const Text('Weekly'),
+              ),
+              const SizedBox(width: 10),
+              ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isWeekly = false;
+                  });
+                },
+                child: const Text('Monthly'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Expanded(
+            child: stats.isNotEmpty
+                ? ListView.builder(
+                    itemCount: stats.length,
+                    itemBuilder: (context, index) {
+                      final habitName = stats.keys.elementAt(index);
+                      final habitCount = stats.values.elementAt(index);
+
+                      return ListTile(
+                        title: Text(habitName),
+                        subtitle: Text(
+                            '${_isWeekly ? 'Weekly' : 'Monthly'} Completions: $habitCount'),
+                      );
+                    },
+                  )
+                : const Center(
+                    child: Text('No statistics available yet.'),
+                  ),
+          ),
+        ],
       ),
     );
   }
