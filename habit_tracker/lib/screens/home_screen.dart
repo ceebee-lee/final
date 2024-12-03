@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 import '../providers/habit_provider.dart';
-import '../providers/quote_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -13,6 +13,31 @@ class HomeScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Text(
+                'Menu',
+                style: TextStyle(color: Colors.white, fontSize: 24),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.brightness_6),
+              title: const Text('Toggle Dark Mode'),
+              onTap: () {
+                Provider.of<ThemeProvider>(context, listen: false)
+                    .toggleTheme();
+                Navigator.pop(context); // 메뉴 닫기
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -57,32 +82,9 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  void _addNewHabit(BuildContext context, HabitProvider provider) async {
+  void _addNewHabit(BuildContext context, HabitProvider provider) {
     final TextEditingController nameController = TextEditingController();
     final TextEditingController goalController = TextEditingController();
-    final quoteProvider = QuoteProvider();
-
-    // 동기부여 문구 가져오기
-    String quote = 'Loading...';
-    await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Loading Motivation'),
-          content: FutureBuilder<String>(
-            future: quoteProvider.fetchRandomQuote(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                quote = snapshot.data ?? 'Stay positive!';
-                return Text(quote);
-              } else {
-                return const CircularProgressIndicator();
-              }
-            },
-          ),
-        );
-      },
-    );
 
     showDialog(
       context: context,
@@ -100,11 +102,6 @@ class HomeScreen extends StatelessWidget {
                 controller: goalController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(hintText: 'Goal Count'),
-              ),
-              const SizedBox(height: 20),
-              Text(
-                'Motivation:\n$quote',
-                style: const TextStyle(fontStyle: FontStyle.italic),
               ),
             ],
           ),
