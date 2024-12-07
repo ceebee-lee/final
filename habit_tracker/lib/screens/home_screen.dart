@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
 import '../providers/habit_provider.dart';
-import '../providers/quote_provider.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -33,17 +32,16 @@ class HomeScreen extends StatelessWidget {
               leading: const Icon(Icons.brightness_6),
               title: const Text('Toggle Dark Mode'),
               onTap: () {
-                themeProvider.toggleTheme(); // Dark mode toggle
-                Navigator.pop(context); // Close menu
+                themeProvider.toggleTheme();
+                Navigator.pop(context);
               },
             ),
+            // 'Settings' 버튼 삭제
           ],
         ),
       ),
       body: Column(
         children: [
-          const SizedBox(height: 20),
-          const MotivationalQuoteWidget(), // Display API-fetched quote
           const SizedBox(height: 20),
           Expanded(
             child: habitProvider.habits.isEmpty
@@ -175,47 +173,6 @@ class HomeScreen extends StatelessWidget {
           ],
         );
       },
-    );
-  }
-}
-
-// MotivationalQuoteWidget: Display a quote fetched from API
-class MotivationalQuoteWidget extends StatefulWidget {
-  const MotivationalQuoteWidget({super.key});
-
-  @override
-  State<MotivationalQuoteWidget> createState() =>
-      _MotivationalQuoteWidgetState();
-}
-
-class _MotivationalQuoteWidgetState extends State<MotivationalQuoteWidget> {
-  String? _quote;
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchQuote();
-  }
-
-  Future<void> _fetchQuote() async {
-    final quoteProvider = QuoteProvider();
-    final quote = await quoteProvider.fetchRandomQuote();
-    setState(() {
-      _quote = quote;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: _quote == null
-          ? const CircularProgressIndicator()
-          : Text(
-              _quote!,
-              style: const TextStyle(fontSize: 18, fontStyle: FontStyle.italic),
-              textAlign: TextAlign.center,
-            ),
     );
   }
 }
