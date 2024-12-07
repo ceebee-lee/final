@@ -100,28 +100,63 @@ class HomePageContent extends StatelessWidget {
                   itemCount: habitProvider.habits.length,
                   itemBuilder: (context, index) {
                     final habit = habitProvider.habits[index];
-                    return ListTile(
-                      title: Text(habit.name),
-                      subtitle: Text(
-                        'Progress: ${habit.currentCount}/${habit.goalCount}',
+                    final progress = habit.currentCount / habit.goalCount;
+
+                    return Card(
+                      margin: const EdgeInsets.all(10),
+                      elevation: 5,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
                       ),
-                      trailing: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.add),
-                            onPressed: () {
-                              habitProvider.incrementHabit(index);
-                              _showCompletionAnimation(context);
-                            },
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () {
-                              habitProvider.removeHabit(index);
-                            },
-                          ),
-                        ],
+                      child: Padding(
+                        padding: const EdgeInsets.all(15),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              habit.name,
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .titleLarge
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                            const SizedBox(height: 10),
+                            LinearProgressIndicator(
+                              value: progress,
+                              backgroundColor: Colors.grey[300],
+                              color:
+                                  progress >= 1.0 ? Colors.green : Colors.blue,
+                              minHeight: 8,
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${(progress * 100).toStringAsFixed(0)}% completed',
+                                  style: Theme.of(context).textTheme.bodyLarge,
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(Icons.add),
+                                      onPressed: () {
+                                        habitProvider.incrementHabit(index);
+                                        _showCompletionAnimation(context);
+                                      },
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.delete),
+                                      onPressed: () {
+                                        habitProvider.removeHabit(index);
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
@@ -157,55 +192,76 @@ class HomePageContent extends StatelessWidget {
   }
 
   void _showAddHabitScreen(BuildContext context, HabitProvider provider) {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return _buildAddHabitDialog(context, provider);
+        },
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(0, 1);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          final tween =
+              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          final offsetAnimation = animation.drive(tween);
+
+          return SlideTransition(
+            position: offsetAnimation,
+            child: FadeTransition(opacity: animation, child: child),
+          );
+        },
+        transitionDuration: const Duration(milliseconds: 300),
+      ),
+    );
+  }
+
+  Widget _buildAddHabitDialog(BuildContext context, HabitProvider provider) {
     final nameController = TextEditingController();
     final goalController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Add New Habit'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              TextField(
-                controller: nameController,
-                decoration: const InputDecoration(hintText: 'Habit Name'),
-              ),
-              const SizedBox(height: 8),
-              TextField(
-                controller: goalController,
-                keyboardType: TextInputType.number,
-                decoration: const InputDecoration(hintText: 'Goal Count'),
-              ),
-            ],
+    return AlertDialog(
+      title: const Text('Add New Habit'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          TextField(
+            controller: nameController,
+            decoration: const InputDecoration(hintText: 'Habit Name'),
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (nameController.text.isNotEmpty &&
-                    goalController.text.isNotEmpty) {
-                  final goalCount = int.tryParse(goalController.text);
-                  if (goalCount != null) {
-                    provider.addHabit(nameController.text, goalCount);
-                    Navigator.of(context).pop();
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                          content: Text('Please enter a valid number.')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Add'),
-            ),
-          ],
-        );
-      },
+          const SizedBox(height: 8),
+          TextField(
+            controller: goalController,
+            keyboardType: TextInputType.number,
+            decoration: const InputDecoration(hintText: 'Goal Count'),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            if (nameController.text.isNotEmpty &&
+                goalController.text.isNotEmpty) {
+              final goalCount = int.tryParse(goalController.text);
+              if (goalCount != null) {
+                provider.addHabit(nameController.text, goalCount);
+                Navigator.of(context).pop();
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Please enter a valid number.'),
+                  ),
+                );
+              }
+            }
+          },
+          child: const Text('Add'),
+        ),
+      ],
     );
   }
 }
