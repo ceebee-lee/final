@@ -37,13 +37,6 @@ class HomeScreen extends StatelessWidget {
                 Navigator.pop(context); // Close menu
               },
             ),
-            ListTile(
-              leading: const Icon(Icons.settings),
-              title: const Text('Settings'),
-              onTap: () {
-                Navigator.pop(context); // Close menu
-              },
-            ),
           ],
         ),
       ),
