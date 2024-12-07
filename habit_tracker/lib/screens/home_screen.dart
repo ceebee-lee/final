@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:lottie/lottie.dart'; // Lottie 패키지 import
 import '../providers/theme_provider.dart';
 import '../providers/habit_provider.dart';
 import '../widgets/motivational_quote_widget.dart';
@@ -111,6 +112,7 @@ class HomePageContent extends StatelessWidget {
                             icon: const Icon(Icons.add),
                             onPressed: () {
                               habitProvider.incrementHabit(index);
+                              _showCompletionAnimation(context);
                             },
                           ),
                           IconButton(
@@ -135,75 +137,75 @@ class HomePageContent extends StatelessWidget {
     );
   }
 
-  void _showAddHabitScreen(BuildContext context, HabitProvider provider) {
-    Navigator.of(context).push(
-      PageRouteBuilder(
-        opaque: false,
-        pageBuilder: (context, animation, secondaryAnimation) {
-          return _buildAddHabitDialog(context, provider);
-        },
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          const begin = Offset(0, 1);
-          const end = Offset.zero;
-          const curve = Curves.easeInOut;
-          final tween =
-              Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-          final offsetAnimation = animation.drive(tween);
-
-          return SlideTransition(
-            position: offsetAnimation,
-            child: FadeTransition(opacity: animation, child: child),
-          );
-        },
-        transitionDuration: const Duration(milliseconds: 300),
-      ),
+  void _showCompletionAnimation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Center(
+          child: Lottie.asset(
+            'assets/animations/success.json',
+            repeat: false,
+            onLoaded: (composition) {
+              Future.delayed(composition.duration, () {
+                Navigator.of(context).pop();
+              });
+            },
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildAddHabitDialog(BuildContext context, HabitProvider provider) {
+  void _showAddHabitScreen(BuildContext context, HabitProvider provider) {
     final nameController = TextEditingController();
     final goalController = TextEditingController();
 
-    return AlertDialog(
-      title: const Text('Add New Habit'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          TextField(
-            controller: nameController,
-            decoration: const InputDecoration(hintText: 'Habit Name'),
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Add New Habit'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(hintText: 'Habit Name'),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: goalController,
+                keyboardType: TextInputType.number,
+                decoration: const InputDecoration(hintText: 'Goal Count'),
+              ),
+            ],
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: goalController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(hintText: 'Goal Count'),
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            if (nameController.text.isNotEmpty &&
-                goalController.text.isNotEmpty) {
-              final goalCount = int.tryParse(goalController.text);
-              if (goalCount != null) {
-                provider.addHabit(nameController.text, goalCount);
-                Navigator.of(context).pop();
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please enter a valid number.')),
-                );
-              }
-            }
-          },
-          child: const Text('Add'),
-        ),
-      ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (nameController.text.isNotEmpty &&
+                    goalController.text.isNotEmpty) {
+                  final goalCount = int.tryParse(goalController.text);
+                  if (goalCount != null) {
+                    provider.addHabit(nameController.text, goalCount);
+                    Navigator.of(context).pop();
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Please enter a valid number.')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
