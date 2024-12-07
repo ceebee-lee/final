@@ -7,11 +7,10 @@ class ThirdScreen extends StatefulWidget {
   const ThirdScreen({super.key});
 
   @override
-  _ThirdScreenState createState() => _ThirdScreenState();
+  State<ThirdScreen> createState() => _ThirdScreenState();
 }
 
 class _ThirdScreenState extends State<ThirdScreen> {
-  DateTime _focusedDay = DateTime.now(); // 초기 날짜: 오늘
   DateTime? _selectedDay;
 
   @override
@@ -27,12 +26,11 @@ class _ThirdScreenState extends State<ThirdScreen> {
           TableCalendar(
             firstDay: DateTime(2020, 1, 1),
             lastDay: DateTime(2030, 12, 31),
-            focusedDay: _focusedDay,
+            focusedDay: DateTime.now(),
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
                 _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
               });
             },
           ),
@@ -50,7 +48,8 @@ class _ThirdScreenState extends State<ThirdScreen> {
   }
 
   Widget _buildHabitList(BuildContext context, HabitProvider provider) {
-    final habitsForDate = provider.history[_selectedDay!] ?? [];
+    // 선택된 날짜에 해당하는 습관 데이터 가져오기
+    final habitsForDate = provider.getHistory(_selectedDay!);
 
     if (habitsForDate.isEmpty) {
       return const Center(
