@@ -46,7 +46,7 @@ class SecondScreen extends StatelessWidget {
                 : Expanded(
                     child: Padding(
                       padding: const EdgeInsets.only(
-                          bottom: 24.0), // 전체 그래프를 위로 약간 이동
+                          bottom: 8.0), // 전체 그래프를 위로 크게 이동
                       child: BarChart(
                         BarChartData(
                           alignment: BarChartAlignment.spaceAround,
