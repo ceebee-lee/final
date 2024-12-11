@@ -104,6 +104,12 @@ class SecondScreen extends StatelessWidget {
                               },
                             ),
                           ),
+                          topTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false), // 맨 위 타이틀 숨김
+                          ),
+                          rightTitles: AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
                         ),
                         gridData: FlGridData(show: false),
                         borderData: FlBorderData(show: false),
