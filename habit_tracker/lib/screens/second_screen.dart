@@ -93,6 +93,8 @@ class SecondScreen extends StatelessWidget {
                           leftTitles: AxisTitles(
                             sideTitles: SideTitles(
                               showTitles: true,
+                              reservedSize: 40,
+                              interval: 1, // 1 단위로 숫자 출력
                               getTitlesWidget: (value, meta) {
                                 return SideTitleWidget(
                                   axisSide: meta.axisSide,
