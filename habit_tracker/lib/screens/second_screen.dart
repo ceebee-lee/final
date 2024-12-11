@@ -28,21 +28,25 @@ class SecondScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Habit Completion Stats',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+            const Padding(
+              padding: EdgeInsets.only(bottom: 10.0), // 제목과 그래프 전체 위치 조정
+              child: Text(
+                'Habit Completion Stats',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10), // 제목 아래 여백 감소
             habits.isEmpty
                 ? const Center(
                     child: Text('No habits available to display stats.'),
                   )
                 : Expanded(
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16.0), // 그래프 위치 조정
+                      padding: const EdgeInsets.only(
+                          bottom: 24.0), // 전체 그래프를 위로 약간 이동
                       child: BarChart(
                         BarChartData(
                           alignment: BarChartAlignment.spaceAround,
@@ -61,7 +65,8 @@ class SecondScreen extends StatelessWidget {
                                   x: entry.key,
                                   barRods: [
                                     BarChartRodData(
-                                      toY: entry.value.completedCount.toDouble(),
+                                      toY:
+                                          entry.value.completedCount.toDouble(),
                                       width: 20,
                                       borderRadius: BorderRadius.circular(4),
                                       color: barColors[entry.key %
@@ -84,7 +89,8 @@ class SecondScreen extends StatelessWidget {
                                       axisSide: meta.axisSide,
                                       child: Text(
                                         habits[habitIndex].name,
-                                        style: const TextStyle(fontSize: 14), // 폰트 크기 증가
+                                        style: const TextStyle(
+                                            fontSize: 14), // 폰트 크기 증가
                                       ),
                                     );
                                   }
@@ -102,14 +108,16 @@ class SecondScreen extends StatelessWidget {
                                     axisSide: meta.axisSide,
                                     child: Text(
                                       value.toInt().toString(),
-                                      style: const TextStyle(fontSize: 14), // 폰트 크기 증가
+                                      style: const TextStyle(
+                                          fontSize: 14), // 폰트 크기 증가
                                     ),
                                   );
                                 },
                               ),
                             ),
                             topTitles: AxisTitles(
-                              sideTitles: SideTitles(showTitles: false), // 맨 위 타이틀 숨김
+                              sideTitles:
+                                  SideTitles(showTitles: false), // 맨 위 타이틀 숨김
                             ),
                             rightTitles: AxisTitles(
                               sideTitles: SideTitles(showTitles: false),
