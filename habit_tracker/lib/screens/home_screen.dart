@@ -221,6 +221,10 @@ class HomePageContent extends StatelessWidget {
     final goalController = TextEditingController();
 
     return AlertDialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+        side: const BorderSide(color: Colors.blue, width: 2), // 테두리 강조
+      ),
       title: const Text('Add New Habit'),
       content: Column(
         mainAxisSize: MainAxisSize.min,
