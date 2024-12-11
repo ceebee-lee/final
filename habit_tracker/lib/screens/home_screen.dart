@@ -87,6 +87,8 @@ class HomePageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final habitProvider = Provider.of<HabitProvider>(context);
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Column(
       children: [
@@ -163,6 +165,10 @@ class HomePageContent extends StatelessWidget {
                 ),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: isDarkMode ? Colors.white : Colors.black, // 배경색 반전
+            foregroundColor: isDarkMode ? Colors.black : Colors.white, // 글자색 반전
+          ),
           onPressed: () {
             _showAddHabitScreen(context, habitProvider);
           },
