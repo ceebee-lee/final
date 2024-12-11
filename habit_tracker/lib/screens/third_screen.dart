@@ -26,7 +26,7 @@ class _ThirdScreenState extends State<ThirdScreen> {
           TableCalendar(
             firstDay: DateTime(2020, 1, 1),
             lastDay: DateTime(2030, 12, 31),
-            focusedDay: DateTime.now(),
+            focusedDay: _selectedDay ?? DateTime.now(),
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
             onDaySelected: (selectedDay, focusedDay) {
               setState(() {
@@ -49,21 +49,36 @@ class _ThirdScreenState extends State<ThirdScreen> {
 
   Widget _buildHabitList(BuildContext context, HabitProvider provider) {
     // 선택된 날짜에 해당하는 습관 데이터 가져오기
-    final habitsForDate = provider.getHistory(_selectedDay!);
+    final normalizedDate =
+        DateTime(_selectedDay!.year, _selectedDay!.month, _selectedDay!.day);
+    final habits = provider.habits
+        .where((habit) =>
+            habit.lastUpdated != null &&
+            DateTime(habit.lastUpdated!.year, habit.lastUpdated!.month,
+                    habit.lastUpdated!.day) ==
+                normalizedDate)
+        .toList();
 
-    if (habitsForDate.isEmpty) {
+    if (habits.isEmpty) {
       return const Center(
         child: Text('No habits recorded on this day.'),
       );
     }
 
     return ListView.builder(
-      itemCount: habitsForDate.length,
+      itemCount: habits.length,
       itemBuilder: (context, index) {
-        final habit = habitsForDate[index];
-        return ListTile(
-          title: Text(habit.name),
-          subtitle: Text('Completed: ${habit.completedCount} times'),
+        final habit = habits[index];
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+          child: ListTile(
+            title: Text(habit.name),
+            subtitle:
+                Text('Progress: ${habit.currentCount}/${habit.goalCount}'),
+            trailing: habit.currentCount >= habit.goalCount
+                ? const Icon(Icons.check_circle, color: Colors.green)
+                : const Icon(Icons.timelapse, color: Colors.orange),
+          ),
         );
       },
     );
