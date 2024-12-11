@@ -82,7 +82,7 @@ class SecondScreen extends StatelessWidget {
                                     axisSide: meta.axisSide,
                                     child: Text(
                                       habits[habitIndex].name,
-                                      style: const TextStyle(fontSize: 10),
+                                      style: const TextStyle(fontSize: 14), // 폰트 크기 증가
                                     ),
                                   );
                                 }
@@ -100,7 +100,7 @@ class SecondScreen extends StatelessWidget {
                                   axisSide: meta.axisSide,
                                   child: Text(
                                     value.toInt().toString(),
-                                    style: const TextStyle(fontSize: 10),
+                                    style: const TextStyle(fontSize: 14), // 폰트 크기 증가
                                   ),
                                 );
                               },
