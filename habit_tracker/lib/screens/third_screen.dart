@@ -73,8 +73,13 @@ class _ThirdScreenState extends State<ThirdScreen> {
           margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
           child: ListTile(
             title: Text(habit.name),
-            subtitle:
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Text('Progress: ${habit.currentCount}/${habit.goalCount}'),
+                Text('Completed: ${habit.completedCount} times'),
+              ],
+            ),
             trailing: habit.currentCount >= habit.goalCount
                 ? const Icon(Icons.check_circle, color: Colors.green)
                 : const Icon(Icons.timelapse, color: Colors.orange),
